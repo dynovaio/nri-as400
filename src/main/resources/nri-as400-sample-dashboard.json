@@ -1,191 +1,286 @@
 {
-    "title": "IBM iSeries (AS400) Overview",
-    "icon": "bar-chart",
-    "grid_column_count": 3,
-    "filter": {
-        "key_names": ["host", "job", "jobNumber", "severity", "queue", "jobName"],
-        "event_types": ["AS400:MessageQueueEvent", "AS400:JobList", "AS400:SystemStatusEvent"],
-        "filter_first": false
-    },
-    "widgets": [{
-        "title": "iSeries Servers",
-        "nrql": "FROM `AS400:MessageQueueEvent` SELECT uniquecount(host) FACET host SINCE 1 week ago",
-        "process_as": "facet_table",
-        "width": 1,
-        "height": 1,
-        "row": 1,
-        "column": 1,
-        "event_types": ["AS400:MessageQueueEvent"],
-        "facet": "host",
-        "customizations": {},
-        "notes": null
-    }, {
-        "title": "iSeries Queues",
-        "nrql": "FROM `AS400:MessageQueueEvent` SELECT count(message) FACET queue",
-        "process_as": "facet_table",
-        "width": 1,
-        "height": 1,
-        "row": 1,
-        "column": 2,
-        "event_types": ["AS400:MessageQueueEvent"],
-        "facet": "queue",
-        "customizations": {},
-        "notes": null
-    }, {
-        "title": "Number of Messages by Severity",
-        "nrql": "from `AS400:MessageQueueEvent` SELECT count(message) FACET severity",
-        "process_as": "facet_bar_chart",
-        "width": 1,
-        "height": 1,
-        "row": 1,
-        "column": 3,
-        "event_types": ["AS400:MessageQueueEvent"],
-        "facet": "severity",
-        "customizations": {},
-        "notes": null
-    }, {
-        "title": "Jobs",
-        "nrql": "FROM `AS400:MessageQueueEvent` SELECT count(message) FACET job SINCE 1 day ago",
-        "process_as": "facet_table",
-        "width": 1,
-        "height": 2,
-        "row": 2,
-        "column": 1,
-        "event_types": ["AS400:MessageQueueEvent"],
-        "facet": "job",
-        "customizations": {},
-        "notes": null
-    }, {
-        "title": "Average Number of Batch Jobs Last Minute",
-        "nrql": "from `AS400:SystemStatusEvent` SELECT average(numberOfBatchJobsRunning) as 'Number of Batch Jobs' SINCE 1 minutes ago",
-        "process_as": "billboard",
-        "width": 1,
-        "height": 1,
-        "row": 2,
-        "column": 2,
-        "event_types": ["AS400:SystemStatusEvent"],
-        "facet": null,
-        "customizations": {},
-        "notes": null
-    }, {
-        "title": "Count of Messages by Job Number",
-        "nrql": "from `AS400:MessageQueueEvent` SELECT count(message) FACET jobNumber",
-        "process_as": "facet_bar_chart",
-        "width": 1,
-        "height": 1,
-        "row": 2,
-        "column": 3,
-        "event_types": ["AS400:MessageQueueEvent"],
-        "facet": "jobNumber",
-        "customizations": {},
-        "notes": null
-    }, {
-        "title": "Average Jobs Held on Queue last Minute",
-        "nrql": "from `AS400:SystemStatusEvent` SELECT average(numberOfBatchJobsHeldOnQueue) as 'Jobs Held' since 1 minutes ago",
-        "process_as": "billboard",
-        "width": 1,
-        "height": 1,
-        "row": 3,
-        "column": 2,
-        "event_types": ["AS400:SystemStatusEvent"],
-        "facet": null,
-        "customizations": {},
-        "notes": null
-    }, {
-        "title": "Average Number of Active Jobs Last Minute",
-        "nrql": "from `AS400:SystemStatusEvent` select average(numberActiveJobsInSystem) as 'Active Jobs' since 1 minutes ago",
-        "process_as": "billboard",
-        "width": 1,
-        "height": 1,
-        "row": 3,
-        "column": 3,
-        "event_types": ["AS400:SystemStatusEvent"],
-        "facet": null,
-        "customizations": {},
-        "notes": null
-    }, {
-        "title": "Messages",
-        "nrql": "FROM `AS400:MessageQueueEvent` select messageID, message, queue, severity limit 1000",
-        "process_as": "event_table",
-        "width": 3,
-        "height": 1,
-        "row": 4,
-        "column": 1,
-        "event_types": ["AS400:MessageQueueEvent"],
-        "facet": null,
-        "customizations": null,
-        "notes": null
-    }, {
-        "title": "Processor utilization",
-        "nrql": "from `AS400:SystemStatusEvent` select max(percentProcessingUnitUsed) as 'Proc units used', max(percentSharedProcessorPoolUsed) as 'Shared proc pool usage' since 1 minute ago",
-        "process_as": "attribute_sheet",
-        "width": 1,
-        "height": 1,
-        "row": 5,
-        "column": 1,
-        "event_types": ["AS400:SystemStatusEvent"],
-        "facet": null,
-        "customizations": null,
-        "notes": null
-    }, {
-        "title": "Storage utilization",
-        "nrql": "from `AS400:SystemStatusEvent` select max(mainStorageSize) as 'Storage', max(maxUnprotectedStorageUsed) as 'Storage used', max(totalAuxiliaryStorage) as 'ASP', max(percentSystemASPUsed) as '% ASP used' since 1 minute ago",
-        "process_as": "attribute_sheet",
-        "width": 2,
-        "height": 1,
-        "row": 5,
-        "column": 2,
-        "event_types": ["AS400:SystemStatusEvent"],
-        "facet": null,
-        "customizations": null,
-        "notes": null
-    }, {
-        "title": "",
-        "nrql": "SELECT count(*) FROM `AS400:JobList` FACET jobName",
-        "process_as": "facet_bar_chart",
-        "width": 1,
-        "height": 3,
-        "row": 6,
-        "column": 1,
-        "event_types": ["AS400:JobList"],
-        "facet": "jobName",
-        "customizations": {},
-        "notes": null
-    }, {
-        "title": "Job List Data",
-        "nrql": "SELECT jobStatus,jobCPUUsed,jobNumber,jobQueue, jobSubsystem,jobUser  FROM `AS400:JobList`",
-        "process_as": "event_table",
-        "width": 2,
-        "height": 2,
-        "row": 6,
-        "column": 2,
-        "event_types": ["AS400:JobList"],
-        "facet": null,
-        "customizations": null,
-        "notes": null
-    }, {
-        "title": "",
-        "nrql": "SELECT count(*) FROM `AS400:JobList` FACET jobStatus",
-        "process_as": "facet_pie_chart",
-        "width": 2,
-        "height": 1,
-        "row": 8,
-        "column": 2,
-        "event_types": ["AS400:JobList"],
-        "facet": "jobStatus",
-        "customizations": {},
-        "notes": null
-    }, {
-        "title": "Job counts by subsystem",
-        "nrql": "SELECT count(jobName) as 'Jobs' FROM `AS400:JobList` facet jobSubsystem",
-        "process_as": "facet_pie_chart",
-        "width": 1,
-        "height": 1,
-        "row": 9,
-        "column": 1,
-        "event_types": ["AS400:JobList"],
-        "facet": "jobSubsystem",
-        "customizations": {},
-        "notes": null
-    }]
+  "name": "IBM iSeries (AS400) Overview",
+  "description": "Comprehensive overview of IBM iSeries (AS400) systems, memory pools, disk usage, active jobs, and message queues.",
+  "permissions": "PUBLIC_READ_WRITE",
+  "pages": [
+    {
+      "name": "IBM iSeries (AS400) Overview",
+      "description": null,
+      "widgets": [
+        {
+          "title": "Active Jobs",
+          "layout": {
+            "column": 1,
+            "row": 1,
+            "width": 3,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.billboard"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountId": 0,
+                "query": "SELECT latest(numberActiveJobsInSystem) AS 'Active Jobs' FROM `AS400:SystemStatusEvent`"
+              }
+            ]
+          }
+        },
+        {
+          "title": "CPU Utilization",
+          "layout": {
+            "column": 4,
+            "row": 1,
+            "width": 3,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.billboard"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountId": 0,
+                "query": "SELECT latest(percentProcessingUnitUsed) AS 'CPU %' FROM `AS400:SystemStatusEvent`"
+              }
+            ]
+          }
+        },
+        {
+          "title": "System ASP Used",
+          "layout": {
+            "column": 7,
+            "row": 1,
+            "width": 3,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.billboard"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountId": 0,
+                "query": "SELECT latest(percentSystemASPUsed) AS 'ASP Used %' FROM `AS400:SystemStatusEvent`"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Signed-On Users",
+          "layout": {
+            "column": 10,
+            "row": 1,
+            "width": 3,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.billboard"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountId": 0,
+                "query": "SELECT latest(currentUsersSignedOn) AS 'Users' FROM `AS400:SystemStatusEvent`"
+              }
+            ]
+          }
+        },
+        {
+          "title": "CPU & Interactive Performance Trends",
+          "layout": {
+            "column": 1,
+            "row": 4,
+            "width": 6,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountId": 0,
+                "query": "SELECT average(percentProcessingUnitUsed) AS 'CPU %', average(percentCurrentInteractivePerformance) AS 'Interactive %' FROM `AS400:SystemStatusEvent` SINCE 1 HOUR AGO TIMESERIES AUTO"
+              }
+            ]
+          }
+        },
+        {
+          "title": "System ASP & Unprotected Storage Used",
+          "layout": {
+            "column": 7,
+            "row": 4,
+            "width": 6,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountId": 0,
+                "query": "SELECT average(percentSystemASPUsed) AS '% ASP Used', average(currentUnprotectedStorageUsed) / 1024 AS 'Unprotected Storage (GB)' FROM `AS400:SystemStatusEvent` SINCE 1 HOUR AGO TIMESERIES AUTO"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Memory Pool Sizes (GB)",
+          "layout": {
+            "column": 1,
+            "row": 7,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.bar"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountId": 0,
+                "query": "SELECT latest(poolSize) / 1024 / 1024 AS 'Pool Size (GB)' FROM `AS400:MemoryStatusEvent` FACET poolName SINCE 30 MINUTES AGO"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Memory Faults & Paging Rates",
+          "layout": {
+            "column": 5,
+            "row": 7,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountId": 0,
+                "query": "SELECT average(databaseFaults + nondatabaseFaults) AS 'Faults/sec', average(databasePages + nondatabasePages) AS 'Pages/sec' FROM `AS400:MemoryStatusEvent` FACET poolName SINCE 1 HOUR AGO TIMESERIES AUTO"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Disk Unit Storage Usage",
+          "layout": {
+            "column": 9,
+            "row": 7,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.bar"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountId": 0,
+                "query": "SELECT latest(percentUsed) AS '% Used' FROM `AS400:DiskUsageEvent` FACET resourceName SINCE 30 MINUTES AGO LIMIT 20"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Job Status Distribution",
+          "layout": {
+            "column": 1,
+            "row": 10,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.pie"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountId": 0,
+                "query": "SELECT count(*) FROM `AS400:JobList` FACET jobStatus SINCE 1 HOUR AGO"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Jobs by Subsystem",
+          "layout": {
+            "column": 5,
+            "row": 10,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.bar"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountId": 0,
+                "query": "SELECT count(*) AS 'Jobs' FROM `AS400:JobList` FACET jobSubsystem SINCE 1 HOUR AGO"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Batch Jobs Overview",
+          "layout": {
+            "column": 9,
+            "row": 10,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountId": 0,
+                "query": "SELECT latest(numberOfBatchJobsRunning) AS 'Running', latest(numberOfBatchJobsHeldOnQueue) AS 'Held on Queue', latest(numberOfBatchJobsWaitingForMessage) AS 'Waiting for Msg' FROM `AS400:SystemStatusEvent` SINCE 1 HOUR AGO TIMESERIES AUTO"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Recent Message Queue Messages",
+          "layout": {
+            "column": 1,
+            "row": 13,
+            "width": 12,
+            "height": 4
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.table"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountId": 0,
+                "query": "SELECT timestamp, host, queue, severity, messageID, message FROM `AS400:MessageQueueEvent` SINCE 1 DAY AGO LIMIT 100"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
 }
