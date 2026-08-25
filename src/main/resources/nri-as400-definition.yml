@@ -1,5 +1,5 @@
 name: com.newrelic.as400
-protocol_version: 1
+protocol_version: 3
 description: Monitors iSeries (AS400) - jobs, message queues, system status, memory status, and disk usage
 commands:
   job-list:
