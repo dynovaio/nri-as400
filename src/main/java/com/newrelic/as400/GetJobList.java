@@ -39,6 +39,7 @@ import com.ibm.as400.access.SystemStatus;
 import com.ibm.as400.access.AS400SecurityException;
 import com.ibm.as400.access.ErrorCompletingRequestException;
 import com.ibm.as400.access.ObjectDoesNotExistException;
+import com.newrelic.labs.utils.PayloadUtil;
 
 public class GetJobList {
 	private static String s_systemName;
@@ -152,30 +153,6 @@ public class GetJobList {
 			Enumeration<?> listOfJobs = jobList.getJobs();
 			// For each job in the list print information about the job.
 			String strJSONMetrics = "";
-			String strJSONHeader = ("{" +
-					"\"name\":" +
-						'"' +
-						s_strNrName +
-						'"' +
-						"," +
-						"\"host\":" +
-						'"' +
-						strAs400 +
-						'"' +
-						"," +
-						"\"protocol_version\":" +
-						'"' +
-						s_strNrProtoVersion +
-						'"' +
-						"," +
-						"\"integration_version\":" +
-						'"' +
-						s_strNrIntVersion +
-						'"' +
-						"," +
-						"\"metrics\":" +
-						"[");
-			String strJSONFooter = ("]," + "\"inventory\":" + "{" + "}," + "\"events\":" + "[" + "]" + "}");
 			System.err.println("JobList: " + jobList.getLength());
 			
 			while (listOfJobs.hasMoreElements()) {
@@ -184,8 +161,11 @@ public class GetJobList {
 					strJSONMetrics += json;
 				}
 			}
-			strJSONMetrics = strJSONMetrics.substring(0, strJSONMetrics.length() - 1);
-			System.out.println(strJSONHeader + strJSONMetrics + strJSONFooter);
+			if (!strJSONMetrics.isEmpty() && strJSONMetrics.endsWith(",")) {
+				strJSONMetrics = strJSONMetrics.substring(0, strJSONMetrics.length() - 1);
+			}
+			String entityName = PayloadUtil.resolveEntityName(s_systemName, strAs400);
+			System.out.println(PayloadUtil.buildProtocolV3Json(entityName, PayloadUtil.DEFAULT_ENTITY_TYPE, strJSONMetrics));
 			
 		} catch (Exception e) {
 			System.err.println("Exception: " + e.getMessage());

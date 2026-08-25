@@ -14,6 +14,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 import com.ibm.as400.access.*;
+import com.newrelic.labs.utils.PayloadUtil;
 
 public class GetMemoryStatus {
 	
@@ -83,7 +84,7 @@ public class GetMemoryStatus {
             {
             	getFormat0400_Data(as400, as400Data);
             }
-            String strJson = getJsonText();
+            String strJson = getJsonText(strAs400);
             System.out.println(strJson);
             
             // This program is done running program so disconnect from
@@ -460,14 +461,9 @@ public class GetMemoryStatus {
 	    return ByteBuffer.wrap(bytes).getDouble();
 	}
 	
-	private static String getJsonText()  {
-		String strNrName = "com.newrelic.as400-memory-status";
+	private static String getJsonText(String fallbackHost)  {
 		String strNrEventType = "AS400:MemoryStatusEvent";
-		String strNrProtoVersion = "1";
-		String strNrIntVersion = "0.2.0";
 		String strJSONMetrics = "";
-		String strJSONHeader = ("{" + "\"name\":" + '"' + strNrName + '"' + "," + "\"protocol_version\":" + '"' + strNrProtoVersion + '"' + "," + "\"integration_version\":" + '"' + strNrIntVersion + '"' + "," + "\"metrics\":" + "[");
-		String strJSONFooter = ("]," + "\"inventory\":" + "{" + "}," + "\"events\":" + "[" + "]" + "}");
 		
 		String instanceGUID = java.util.UUID.randomUUID().toString();
 		
@@ -582,7 +578,8 @@ public class GetMemoryStatus {
 						poolEntry.m_ssts0400_currentIneligibleThreads +
 						"}";
 		}
-		return strJSONHeader + strJSONMetrics + strJSONFooter;
 
+		String entityName = PayloadUtil.resolveEntityName(s_ssts0400_systemName, fallbackHost);
+		return PayloadUtil.buildProtocolV3Json(entityName, PayloadUtil.DEFAULT_ENTITY_TYPE, strJSONMetrics);
 	}
 }

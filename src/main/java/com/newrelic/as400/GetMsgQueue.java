@@ -36,6 +36,8 @@ import com.ibm.as400.access.ErrorCompletingRequestException;
 import com.ibm.as400.access.MessageQueue;
 import com.ibm.as400.access.ObjectDoesNotExistException;
 import com.ibm.as400.access.QueuedMessage;
+import com.ibm.as400.access.SystemStatus;
+import com.newrelic.labs.utils.PayloadUtil;
 
 public class GetMsgQueue {
 
@@ -46,13 +48,8 @@ public class GetMsgQueue {
 		String strQueue = System.getenv("MSGQUEUE");
 		String strUser = System.getenv("USERID");
 		String strPass = System.getenv("PASSWD");
-		String strNrName = "com.newrelic.as400-message-queue";
 		String strNrEventType = "AS400:MessageQueueEvent";
-		String strNrProtoVersion = "1";
-		String strNrIntVersion = "0.1.0";
 		String strJSONMetrics = "";
-		String strJSONHeader = ("{" + "\"name\":" + '"' + strNrName + '"' + "," + "\"protocol_version\":" + '"' + strNrProtoVersion + '"' + "," + "\"integration_version\":" + '"' + strNrIntVersion + '"' + "," + "\"metrics\":" + "[");
-		String strJSONFooter = ("]," + "\"inventory\":" + "{" + "}," + "\"events\":" + "[" + "]" + "}");
 		boolean bFirstRun = true;
 		String strNrEventSummary = "AS400 message queue messages";
 		AS400 as400 = new AS400(strAs400, strUser, strPass);
@@ -169,9 +166,15 @@ public class GetMsgQueue {
 				bFirstRun = true;
 			}
 		}
-		if (!strJSONMetrics.isEmpty()) {
+		if (!strJSONMetrics.isEmpty() && strJSONMetrics.endsWith(",")) {
 			strJSONMetrics = strJSONMetrics.substring(0, strJSONMetrics.length() - 1);
 		}
-		System.out.println(strJSONHeader + strJSONMetrics + strJSONFooter);
+		String sysName = null;
+		try {
+			SystemStatus systemStatus = new SystemStatus(as400);
+			sysName = systemStatus.getSystemName().trim();
+		} catch (Exception ignored) {}
+		String entityName = PayloadUtil.resolveEntityName(sysName, strAs400);
+		System.out.println(PayloadUtil.buildProtocolV3Json(entityName, PayloadUtil.DEFAULT_ENTITY_TYPE, strJSONMetrics));
 	}
 }

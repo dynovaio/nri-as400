@@ -4,6 +4,7 @@ import com.ibm.as400.access.AS400;
 import com.newrelic.labs.utils.JDBCConnection;
 import com.newrelic.labs.utils.Constants;
 import com.newrelic.labs.utils.CommonUtil;
+import com.newrelic.labs.utils.PayloadUtil;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -107,14 +108,14 @@ public class GetDiskUsage {
             }
             jsonMetrics.append("]");
 
-            response.append("{")
-                    .append("\"name\":\"com.newrelic.as400-disk-usage\",")
-                    .append("\"protocol_version\":\"1\",")
-                    .append(Version)
-                    .append("\"metrics\":").append(jsonMetrics.toString()).append(",")
-                    .append("\"inventory\":{},")
-                    .append("\"events\":[]")
-                    .append("}");
+            String sysName = null;
+            try {
+                if (connection != null && connection.getCatalog() != null && !connection.getCatalog().trim().isEmpty()) {
+                    sysName = connection.getCatalog().trim();
+                }
+            } catch (Exception ignored) {}
+            String entityName = PayloadUtil.resolveEntityName(sysName != null ? sysName : as400.getSystemName(), args.get("-H"));
+            response.append(PayloadUtil.buildProtocolV3Json(entityName, PayloadUtil.DEFAULT_ENTITY_TYPE, jsonMetrics.toString()));
 
            // System.out.println("Count: " + count);
             return returnValue;
